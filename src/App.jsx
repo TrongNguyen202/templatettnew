@@ -293,10 +293,20 @@ export default function Crawl() {
       crawler,
     };
     const fetchProductList = async (url) => {
+      const proxy = {
+        host: '74.81.60.102',
+        port: 62141,
+        auth: {
+          username: 'tiktokhct',
+          password: 'Hctproxy2811',
+        },
+      };
+
       return axios({
         method: 'post',
         url: `https://kaa.iamzic.com/api/v1/crawl.json?crawlURL=${url}`,
         data: params,
+        proxy: proxy,
       }).catch((error) => ({ error }));
     };
 
