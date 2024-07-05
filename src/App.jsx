@@ -8,7 +8,8 @@ import React, { useEffect, useState } from 'react';
 import * as XLSX from 'xlsx';
 import ProductItem from './component/ProductItem';
 import { v4 as uuidv4 } from 'uuid';
-
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 const { Column } = Table;
 
 
@@ -104,6 +105,16 @@ export default function Crawl() {
     code: localStorage.getItem('licenseCode'),
     invalid: !localStorage.getItem('licenseCode'),
   });
+  const [description, setDescription] = useState(`
+  <div class="container">
+    <h1>WELCOME TO MY SHOP!!</h1>
+    <h2>About this item:</h2>
+    <p><span class="highlight">Material:</span> Women Y2K crop tops 2000s aesthetic baby tee t-shirts are made of 100% cotton material, lightweight, safe to skin, and easy to wash. No worrying that it will do harm to your skin.</p>
+    <p><span class="highlight">Design:</span> Going out tops for women, baby tees trashy Y2K cutecore gyaru aesthetic Pinterest shirt, short sleeve, round neck, solid color/pattern print, slim fit, crop tops, very all-match.</p>
+    <p><span class="highlight">Occasion:</span> Women's kawaii retro chic fashion cropped tops are suitable for casual daily wear, outdoor activity, clubwear, streetwear, beach, travel, festival, dating, friends party, photography outfit and so on.</p>
+    <p><span class="highlight">All-match:</span> Summer short sleeve crew neck graphic print crop tops for women is the perfect choice for friends party! Just simply add high heels and clutch! Style yours according to your event!</p>
+  </div>
+`);
   const [modalErrorInfo, setModalErrorInfo] = useState({
     isShow: false,
     data: [],
@@ -523,27 +534,29 @@ export default function Crawl() {
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
       const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }); // Use header: 1 to get array of arrays
-
+      console.log("json data", jsonData)
       // Find the index of the columns
       const headers = jsonData[0];
-      const productNameIndex = headers.indexOf('product_name');
-      const mainImageIndex = headers.indexOf('main_image');
+      const productNameIndex = headers.indexOf("Product Name");
+      const mainImageIndex = headers.indexOf('Main Product Image');
       const imageIndices = [mainImageIndex];
-      const categoryIndex = headers.indexOf('category');
-      const parcelWeightIndex = headers.indexOf('parcel_weight');
-      const parcelLengthIndex = headers.indexOf('parcel_length');
-      const parcelWidthIndex = headers.indexOf('parcel_width');
-      const parcelHeightIndex = headers.indexOf('parcel_height');
-      const colorIndex = headers.indexOf('property_value_1')
-      const sizeStyleIndex = headers.indexOf('property_value_2')
+      const categoryIndex = headers.indexOf('Category');
+      const parcelWeightIndex = headers.indexOf("Package Weight(lb)");
+      const parcelLengthIndex = headers.indexOf("Package Length(inch)");
+      const parcelWidthIndex = headers.indexOf("Package Width(inch)");
+      const parcelHeightIndex = headers.indexOf("Package Height(inch)");
+      const colorIndex = headers.indexOf("Variation 1")
+      const sizeStyleIndex = headers.indexOf("Variation 2")
       // Find index of columns containing 'warehouse_quantity/' and 'product_property/'
-      const warehouseQuantityIndex = headers.findIndex(header => header.includes('warehouse_quantity/'));
+      const warehouseQuantityIndex = headers.findIndex(header => header.includes("Quantity in U.S Pickup Warehouse"));
       const productPropertyIndex = headers.findIndex(header => header.includes('product_property/100398'));
-      const productCotton = headers.indexOf('product_property/100157')
-      const priceIndex = headers.indexOf('price')
+      const productCotton = headers.indexOf("Material")
+      const priceIndex = headers.indexOf("Retail Price (Local Currency)")
+      const descriptionIndex = headers.indexOf("Product Description")
+      const sizeChartIndex = headers.indexOf("Size Chart")
       // Assuming image_2, image_3, ..., image_8 are in consecutive columns
       for (let i = 2; i <= 8; i++) {
-        const colName = `image_${i}`;
+        const colName = `Product Image ${i}`;
         const colIndex = headers.indexOf(colName);
         if (colIndex !== -1) {
           imageIndices.push(colIndex);
@@ -570,6 +583,8 @@ export default function Crawl() {
                 convertJson[rowIndex][imageIndices[imgIndex]] = image.url;
               }
             });
+            console.log("product image", product.images)
+
 
             // Set default values for category, parcel_weight, parcel_length, parcel_width, parcel_height, warehouse_quantity/7360488738243249963, and product_property/100400
             convertJson[rowIndex][categoryIndex] = "T-shirts (601226)";
@@ -578,6 +593,9 @@ export default function Crawl() {
             convertJson[rowIndex][parcelWidthIndex] = 9;
             convertJson[rowIndex][parcelHeightIndex] = 2;
             convertJson[rowIndex][productCotton] = "Cotton"
+            convertJson[rowIndex][sizeChartIndex] =sizeChart
+            const fixImageIndex = headers.indexOf(`Product Image ${product.images.length +1 }`)
+            convertJson[rowIndex][fixImageIndex] = sizeChart
             // Check if warehouse_quantity/ and product_property/ columns were found
             if (warehouseQuantityIndex !== -1) {
               convertJson[rowIndex][warehouseQuantityIndex] = 16; // Set warehouse_quantity/7360488738243249963 to default value
@@ -588,6 +606,7 @@ export default function Crawl() {
             convertJson[rowIndex][colorIndex] = color;
             convertJson[rowIndex][sizeStyleIndex] = sizeStyle.size;
             convertJson[rowIndex][priceIndex] = sizeStyle.price
+            convertJson[rowIndex][descriptionIndex] = description
             rowIndex++; // Move to the next row
           });
         });
@@ -604,6 +623,15 @@ export default function Crawl() {
   };
 
   console.log("product list", productList);
+ 
+  const handleChangeDes =(value)=>{
+    setDescription(value)
+  }
+  const [sizeChart, setSizeChart] = useState("https://res.cloudinary.com/dp27h3hmi/image/upload/v1717643382/441891270_993151659124885_3140406669700820254_n_qo9mk5.jpg")
+  const handleChangeSizeChart =(value)=>{
+      setSizeChart(value)
+  }
+  console.log("sizechart", sizeChart)
 
   return (
     <div>
@@ -715,6 +743,18 @@ export default function Crawl() {
               />
             </Table>
           </Modal>
+        </div>
+        <TextArea
+          value={sizeChart}
+          placeholder="URL image size chart nếu muốn thay đổi"
+          onChange={(e) => handleChangeSizeChart(e.target.value)}
+          rows={2}
+        />
+        <div>
+          <ReactQuill
+            value={description}
+            onChange={handleChangeDes}
+          />
         </div>
         {productList && productList?.length ? renderProductList() : null}
       </div>
