@@ -543,9 +543,10 @@ export default function Crawl() {
       const workbook = XLSX.read(data, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true, range: 0, defval: "" }); 
-      console.log("json data", jsonData)
+
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true, range: 0, defval: "" });
+      console.log("json data", jsonData);
+
       // Find the index of the columns
       const headers = jsonData[0];
       const productNameIndex = headers.indexOf("product_name");
@@ -556,16 +557,18 @@ export default function Crawl() {
       const parcelLengthIndex = headers.indexOf("parcel_length");
       const parcelWidthIndex = headers.indexOf("parcel_width");
       const parcelHeightIndex = headers.indexOf("parcel_height");
-      const colorIndex = headers.indexOf("property_value_1")
-      const sizeStyleIndex = headers.indexOf("property_value_2")
+      const colorIndex = headers.indexOf("property_value_1");
+      const sizeStyleIndex = headers.indexOf("property_value_2");
+
       // Find index of columns containing 'warehouse_quantity/' and 'product_property/'
       const warehouseQuantityIndex = headers.findIndex(header => header.includes("warehouse_quantity/"));
-      const productPropertyIndex = headers.findIndex(header => header.includes('product_property/100398'));
-      const productCotton = headers.indexOf("product_property/100157")
-      const priceIndex = headers.indexOf("price")
-      const descriptionIndex = headers.indexOf("product_description")
-      const sizeChartIndex = headers.indexOf("size_chart")
-      // const styleIndex = headers.indexOf("Style")
+      let productPropertyIndex = headers.findIndex(header => header.includes('product_property/100398'));
+
+      const productCotton = headers.indexOf("product_property/100157");
+      const priceIndex = headers.indexOf("price");
+      const descriptionIndex = headers.indexOf("product_description");
+      const sizeChartIndex = headers.indexOf("size_chart");
+
       // Assuming image_2, image_3, ..., image_8 are in consecutive columns
       for (let i = 2; i <= 8; i++) {
         const colName = `image_${i}`;
@@ -573,6 +576,17 @@ export default function Crawl() {
         if (colIndex !== -1) {
           imageIndices.push(colIndex);
         }
+      }
+
+      // If the product property column is not found, add it at the end
+      if (productPropertyIndex === -1) {
+        productPropertyIndex = headers.length;
+        headers.push('product_property/100398');
+        jsonData.forEach(row => {
+          if (row.length < headers.length) {
+            row.push(""); // Ensure each row has the same number of columns
+          }
+        });
       }
 
       // Initialize convertJson array and copy existing data
@@ -595,31 +609,29 @@ export default function Crawl() {
                 convertJson[rowIndex][imageIndices[imgIndex]] = image.url;
               }
             });
-            // console.log("product image", product.images)
 
-
-            // Set default values for category, parcel_weight, parcel_length, parcel_width, parcel_height, warehouse_quantity/7360488738243249963, and product_property/100400
+            // Set default values for various columns
             convertJson[rowIndex][categoryIndex] = "T-shirts (601226)";
             convertJson[rowIndex][parcelWeightIndex] = 0.3;
             convertJson[rowIndex][parcelLengthIndex] = 9;
             convertJson[rowIndex][parcelWidthIndex] = 9;
             convertJson[rowIndex][parcelHeightIndex] = 2;
-            convertJson[rowIndex][productCotton] = "Cotton"
-            // convertJson[rowIndex][styleIndex] ="Unisex"
-            convertJson[rowIndex][sizeChartIndex] =sizeChart
-            const fixImageIndex = headers.indexOf(`image_${product.images.length +1}`)
-            convertJson[rowIndex][fixImageIndex] = sizeChart
+            convertJson[rowIndex][productCotton] = "Cotton";
+            convertJson[rowIndex][sizeChartIndex] = sizeChart;
+            const fixImageIndex = headers.indexOf(`image_${product.images.length + 1}`);
+            convertJson[rowIndex][fixImageIndex] = sizeChart;
+
             // Check if warehouse_quantity/ and product_property/ columns were found
             if (warehouseQuantityIndex !== -1) {
               convertJson[rowIndex][warehouseQuantityIndex] = 16; // Set warehouse_quantity/7360488738243249963 to default value
             }
-            if (productPropertyIndex !== -1) {
-              convertJson[rowIndex][productPropertyIndex] = "Unisex"; // Set product_property/100400 to 'Unisex'
-            }
+
+            convertJson[rowIndex][productPropertyIndex] = "Unisex"; // Set product_property/100398 to 'Unisex'
             convertJson[rowIndex][colorIndex] = color;
             convertJson[rowIndex][sizeStyleIndex] = sizeStyle.size;
-            convertJson[rowIndex][priceIndex] = sizeStyle.price
-            convertJson[rowIndex][descriptionIndex] = description
+            convertJson[rowIndex][priceIndex] = sizeStyle.price;
+            convertJson[rowIndex][descriptionIndex] = description;
+
             rowIndex++; // Move to the next row
           });
         });
@@ -634,6 +646,7 @@ export default function Crawl() {
 
     reader.readAsArrayBuffer(file);
   };
+
 
   console.log("product list", productList);
  
