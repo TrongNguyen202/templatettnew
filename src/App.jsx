@@ -543,30 +543,32 @@ export default function Crawl() {
       const workbook = XLSX.read(data, { type: 'array' });
       const sheetName = workbook.SheetNames[0];
       const worksheet = workbook.Sheets[sheetName];
-      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 }); // Use header: 1 to get array of arrays
+      
+      const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true, range: 0, defval: "" }); 
       console.log("json data", jsonData)
       // Find the index of the columns
       const headers = jsonData[0];
-      const productNameIndex = headers.indexOf("Product Name");
-      const mainImageIndex = headers.indexOf('Main Product Image');
+      const productNameIndex = headers.indexOf("product_name");
+      const mainImageIndex = headers.indexOf("main_image");
       const imageIndices = [mainImageIndex];
-      const categoryIndex = headers.indexOf('Category');
-      const parcelWeightIndex = headers.indexOf("Package Weight(lb)");
-      const parcelLengthIndex = headers.indexOf("Package Length(inch)");
-      const parcelWidthIndex = headers.indexOf("Package Width(inch)");
-      const parcelHeightIndex = headers.indexOf("Package Height(inch)");
-      const colorIndex = headers.indexOf("Variation 1")
-      const sizeStyleIndex = headers.indexOf("Variation 2")
+      const categoryIndex = headers.indexOf("category");
+      const parcelWeightIndex = headers.indexOf("parcel_weight");
+      const parcelLengthIndex = headers.indexOf("parcel_length");
+      const parcelWidthIndex = headers.indexOf("parcel_width");
+      const parcelHeightIndex = headers.indexOf("parcel_height");
+      const colorIndex = headers.indexOf("property_value_1")
+      const sizeStyleIndex = headers.indexOf("property_value_2")
       // Find index of columns containing 'warehouse_quantity/' and 'product_property/'
-      const warehouseQuantityIndex = headers.findIndex(header => header.includes("Quantity in U.S Pickup Warehouse"));
+      const warehouseQuantityIndex = headers.findIndex(header => header.includes("warehouse_quantity/"));
       const productPropertyIndex = headers.findIndex(header => header.includes('product_property/100398'));
-      const productCotton = headers.indexOf("Material")
-      const priceIndex = headers.indexOf("Retail Price (Local Currency)")
-      const descriptionIndex = headers.indexOf("Product Description")
-      const sizeChartIndex = headers.indexOf("Size Chart")
+      const productCotton = headers.indexOf("product_property/100157")
+      const priceIndex = headers.indexOf("price")
+      const descriptionIndex = headers.indexOf("product_description")
+      const sizeChartIndex = headers.indexOf("size_chart")
+      // const styleIndex = headers.indexOf("Style")
       // Assuming image_2, image_3, ..., image_8 are in consecutive columns
       for (let i = 2; i <= 8; i++) {
-        const colName = `Product Image ${i}`;
+        const colName = `image_${i}`;
         const colIndex = headers.indexOf(colName);
         if (colIndex !== -1) {
           imageIndices.push(colIndex);
@@ -593,7 +595,7 @@ export default function Crawl() {
                 convertJson[rowIndex][imageIndices[imgIndex]] = image.url;
               }
             });
-            console.log("product image", product.images)
+            // console.log("product image", product.images)
 
 
             // Set default values for category, parcel_weight, parcel_length, parcel_width, parcel_height, warehouse_quantity/7360488738243249963, and product_property/100400
@@ -603,8 +605,9 @@ export default function Crawl() {
             convertJson[rowIndex][parcelWidthIndex] = 9;
             convertJson[rowIndex][parcelHeightIndex] = 2;
             convertJson[rowIndex][productCotton] = "Cotton"
+            // convertJson[rowIndex][styleIndex] ="Unisex"
             convertJson[rowIndex][sizeChartIndex] =sizeChart
-            const fixImageIndex = headers.indexOf(`Product Image ${product.images.length +1 }`)
+            const fixImageIndex = headers.indexOf(`image_${product.images.length +1}`)
             convertJson[rowIndex][fixImageIndex] = sizeChart
             // Check if warehouse_quantity/ and product_property/ columns were found
             if (warehouseQuantityIndex !== -1) {
@@ -637,7 +640,7 @@ export default function Crawl() {
   const handleChangeDes =(value)=>{
     setDescription(value)
   }
-  const [sizeChart, setSizeChart] = useState("https://res.cloudinary.com/dp27h3hmi/image/upload/v1717643382/441891270_993151659124885_3140406669700820254_n_qo9mk5.jpg")
+  const [sizeChart, setSizeChart] = useState("https://res.cloudinary.com/dp27h3hmi/image/upload/v1709264638/IMG_20240301_104024_mbf5ef.jpg")
   const handleChangeSizeChart =(value)=>{
       setSizeChart(value)
   }
@@ -683,10 +686,10 @@ export default function Crawl() {
 
 
         <div className="my-6 flex gap-2">
-          <Upload accept=".xlsx, .xls" beforeUpload={handleFileUpload} multiple={false}>
+          <Upload accept=".xlsx, .xls .csv" beforeUpload={handleFileUpload} multiple={false}>
             <Button icon={<UploadOutlined />}>Upload File</Button>
           </Upload>
-          <Upload accept=".xlsx, .xls" beforeUpload={handleFileConvert} multiple={false}>
+          <Upload accept=".xlsx, .xls .csv" beforeUpload={handleFileConvert} multiple={false}>
             <Button icon={<UploadOutlined />}>Convert File</Button>
           </Upload>
 
