@@ -1,7 +1,7 @@
 
 /* eslint-disable prettier/prettier */
 import { CloudUploadOutlined, CopyOutlined, DownloadOutlined, ImportOutlined, UploadOutlined } from '@ant-design/icons';
-import { Button, Col, Input, Row, Select, Switch, Upload, message, Table, Modal } from 'antd';
+import { Button, Col, Input, Row, Select, Switch, Upload, message, Table, Modal, Checkbox, Divider } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
@@ -10,9 +10,10 @@ import ProductItem from './component/ProductItem';
 import { v4 as uuidv4 } from 'uuid';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+const CheckboxGroup = Checkbox.Group;
 const { Column } = Table;
 
-
+const ShirtOptions = ['T-shirt', 'Hoodie', 'Sweatshirt']
 const crawlerOptions = [
   {
     value: 'Etsy',
@@ -120,8 +121,35 @@ export default function Crawl() {
     data: [],
     title: '',
   });
+  const [checkedList, setCheckedList] = useState(ShirtOptions);
+  const checkAll = ShirtOptions.length === checkedList.length;
+  const indeterminate = checkedList.length > 0 && checkedList.length < ShirtOptions.length;
+  const onChange = (list) => {
+    setCheckedList(list);
+  };
+  const onCheckAllChange = (e) => {
+    setCheckedList(e.target.checked ? ShirtOptions : []);
+  };
   const [downloadType, setDownloadType] = useState('excel');
   const sizes = [
+    { size: "S", price: 25.9 },
+    { size: "M", price: 25.9 },
+    { size: "L", price: 25.9 },
+    { size: "XL", price: 25.9 },
+    { size: "2XL", price: 26.9 },
+    { size: "3XL", price: 28.9 },
+    { size: "4XL", price: 28.9 },
+  ];
+  const sizesSweat = [
+    { size: "S", price: 25.9 },
+    { size: "M", price: 25.9 },
+    { size: "L", price: 25.9 },
+    { size: "XL", price: 25.9 },
+    { size: "2XL", price: 26.9 },
+    { size: "3XL", price: 28.9 },
+    { size: "4XL", price: 28.9 },
+  ];
+  const sizesHoodie = [
     { size: "S", price: 25.9 },
     { size: "M", price: 25.9 },
     { size: "L", price: 25.9 },
@@ -135,8 +163,22 @@ export default function Crawl() {
     size: item.size,
     price: item.price.toString() // Chuyển đổi giá thành chuỗi để input component có thể hiển thị
   }));
+  const dataSweat = sizesSweat.map((item,index)=>({
+    key:index,
+    size:item.size,
+    price:item.price.toString()
+  }))
+
+  const dataHoodie = sizesHoodie.map((item,index)=>({
+    key:index,
+    size:item.size,
+    price:item.price.toString()
+  }))
+
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [tableData, setTableData] = useState(data);
+  const [tableSweat,setTableSweat] = useState(dataSweat);
+  const [tableHoodie,setTableHoodie] = useState(dataHoodie);
 
   const showModal = () => {
     setIsModalVisible(true);
@@ -155,7 +197,19 @@ export default function Crawl() {
     newData[index].price = value;
     setTableData(newData);
   };
-  console.log("prices", tableData)
+
+  const handlePriceSweatChange = (value,index)=>{
+    const newData = [...tableSweat];
+    newData[index].price = value
+    setTableSweat(newData)
+    console.log("data sweat change", tableSweat)
+  }
+  const handlePriceHoodieChange =(value,index)=>{
+    const newData = [...tableHoodie]
+    newData[index].price = value
+    setTableHoodie(newData)
+    console.log("data hoodie change", tableHoodie)
+  }
   useEffect(() => {
     localStorage.setItem('productList', JSON.stringify(productList));
   }, [productList]);
@@ -252,6 +306,7 @@ export default function Crawl() {
       headers,
     })
       .then((response) => {
+       
         return response.json();
       })
       .then((data) => {
@@ -518,13 +573,14 @@ export default function Crawl() {
           };
         });
       }
-      console.log("conversiondata", convertJson)
+    
       setProductList(convertJson);
     };
 
     reader.readAsArrayBuffer(file);
     return false;
   };
+  
   const handleFileConvert = (file) => {
     const reader = new FileReader();
     const colors = [
@@ -536,6 +592,14 @@ export default function Crawl() {
       size: `Unisex T-shirt - ${item.size}`,
       price: item.price
     }));
+    const sizeStylesSweat = tableSweat.map(item=>({
+      size: `Crewneck Sweatshirt - ${item.size}`,
+      price: item.price
+    }))
+    const sizeStylesHoodie = tableHoodie.map(item => ({
+      size: `Unisex Blend Hoodie - ${item.size}`,
+      price: item.price
+    }))
 
     reader.onload = (event) => {
       // Convert data from Excel file to JSON
@@ -545,7 +609,7 @@ export default function Crawl() {
       const worksheet = workbook.Sheets[sheetName];
 
       const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, raw: true, range: 0, defval: "" });
-      console.log("json data", jsonData);
+  
 
       // Find the index of the columns
       const headers = jsonData[0];
@@ -593,49 +657,143 @@ export default function Crawl() {
       let convertJson = [...jsonData];
 
       let rowIndex = 6; // Start from the 5th row onward
-      productList.forEach((product) => {
-        colors.forEach((color) => {
-          sizeStyles.forEach((sizeStyle) => {
-            if (!convertJson[rowIndex]) {
-              convertJson[rowIndex] = []; // Initialize row if it doesn't exist
-            }
-
-            // Set the product name
-            convertJson[rowIndex][productNameIndex] = product.title;
-
-            // Set the images
-            product.images.forEach((image, imgIndex) => {
-              if (imgIndex < imageIndices.length) {
-                convertJson[rowIndex][imageIndices[imgIndex]] = image.url;
+      if(checkedList.includes('T-shirt')){
+        productList.forEach((product) => {
+          colors.forEach((color) => {
+            sizeStyles.forEach((sizeStyle) => {
+              if (!convertJson[rowIndex]) {
+                convertJson[rowIndex] = []; // Initialize row if it doesn't exist
               }
+
+              // Set the product name
+              convertJson[rowIndex][productNameIndex] = product.title;
+
+              // Set the images
+              product.images.forEach((image, imgIndex) => {
+                if (imgIndex < imageIndices.length) {
+                  convertJson[rowIndex][imageIndices[imgIndex]] = image.url;
+                }
+              });
+
+              // Set default values for various columns
+              convertJson[rowIndex][categoryIndex] = "T-shirts (601226)";
+              convertJson[rowIndex][parcelWeightIndex] = 0.3;
+              convertJson[rowIndex][parcelLengthIndex] = 9;
+              convertJson[rowIndex][parcelWidthIndex] = 9;
+              convertJson[rowIndex][parcelHeightIndex] = 2;
+              convertJson[rowIndex][productCotton] = "Cotton";
+              convertJson[rowIndex][sizeChartIndex] = sizeChart;
+              const fixImageIndex = headers.indexOf(`image_${product.images.length + 1}`);
+              convertJson[rowIndex][fixImageIndex] = sizeChart;
+
+              // Check if warehouse_quantity/ and product_property/ columns were found
+              if (warehouseQuantityIndex !== -1) {
+                convertJson[rowIndex][warehouseQuantityIndex] = 16; // Set warehouse_quantity/7360488738243249963 to default value
+              }
+
+              convertJson[rowIndex][productPropertyIndex] = "Unisex"; // Set product_property/100398 to 'Unisex'
+              convertJson[rowIndex][colorIndex] = color;
+              convertJson[rowIndex][sizeStyleIndex] = sizeStyle.size;
+              convertJson[rowIndex][priceIndex] = sizeStyle.price;
+              convertJson[rowIndex][descriptionIndex] = description;
+
+              rowIndex++; // Move to the next row
             });
-
-            // Set default values for various columns
-            convertJson[rowIndex][categoryIndex] = "T-shirts (601226)";
-            convertJson[rowIndex][parcelWeightIndex] = 0.3;
-            convertJson[rowIndex][parcelLengthIndex] = 9;
-            convertJson[rowIndex][parcelWidthIndex] = 9;
-            convertJson[rowIndex][parcelHeightIndex] = 2;
-            convertJson[rowIndex][productCotton] = "Cotton";
-            convertJson[rowIndex][sizeChartIndex] = sizeChart;
-            const fixImageIndex = headers.indexOf(`image_${product.images.length + 1}`);
-            convertJson[rowIndex][fixImageIndex] = sizeChart;
-
-            // Check if warehouse_quantity/ and product_property/ columns were found
-            if (warehouseQuantityIndex !== -1) {
-              convertJson[rowIndex][warehouseQuantityIndex] = 16; // Set warehouse_quantity/7360488738243249963 to default value
-            }
-
-            convertJson[rowIndex][productPropertyIndex] = "Unisex"; // Set product_property/100398 to 'Unisex'
-            convertJson[rowIndex][colorIndex] = color;
-            convertJson[rowIndex][sizeStyleIndex] = sizeStyle.size;
-            convertJson[rowIndex][priceIndex] = sizeStyle.price;
-            convertJson[rowIndex][descriptionIndex] = description;
-
-            rowIndex++; // Move to the next row
           });
         });
-      });
+      }
+
+      if (checkedList.includes('Sweatshirt')) {
+       
+        productList.forEach((product) => {
+          colors.forEach((color) => {
+            sizeStylesSweat.forEach((item2) => {
+              if (!convertJson[rowIndex]) {
+                convertJson[rowIndex] = []; // Initialize row if it doesn't exist
+              }
+
+              // Set the product name
+              convertJson[rowIndex][productNameIndex] = product.title;
+
+              // Set the images
+              product.images.forEach((image, imgIndex) => {
+                if (imgIndex < imageIndices.length) {
+                  convertJson[rowIndex][imageIndices[imgIndex]] = image.url;
+                }
+              });
+
+              // Set default values for various columns
+              convertJson[rowIndex][categoryIndex] = "T-shirts (601226)";
+              convertJson[rowIndex][parcelWeightIndex] = 0.3;
+              convertJson[rowIndex][parcelLengthIndex] = 9;
+              convertJson[rowIndex][parcelWidthIndex] = 9;
+              convertJson[rowIndex][parcelHeightIndex] = 2;
+              convertJson[rowIndex][productCotton] = "Cotton";
+              convertJson[rowIndex][sizeChartIndex] = sizeChart;
+              const fixImageIndex = headers.indexOf(`image_${product.images.length + 1}`);
+              convertJson[rowIndex][fixImageIndex] = sizeChart;
+
+              // Check if warehouse_quantity/ and product_property/ columns were found
+              if (warehouseQuantityIndex !== -1) {
+                convertJson[rowIndex][warehouseQuantityIndex] = 16; // Set warehouse_quantity/7360488738243249963 to default value
+              }
+
+              convertJson[rowIndex][productPropertyIndex] = "Unisex"; // Set product_property/100398 to 'Unisex'
+              convertJson[rowIndex][colorIndex] = color;
+              convertJson[rowIndex][sizeStyleIndex] = item2.size;
+              convertJson[rowIndex][priceIndex] = item2.price;
+              convertJson[rowIndex][descriptionIndex] = description;
+
+              rowIndex++; // Move to the next row
+            });
+          });
+        });
+      }
+      if (checkedList.includes('Hoodie')) {
+        productList.forEach((product) => {
+          colors.forEach((color) => {
+            sizeStylesHoodie.forEach((item3) => {
+              if (!convertJson[rowIndex]) {
+                convertJson[rowIndex] = []; // Initialize row if it doesn't exist
+              }
+
+              // Set the product name
+              convertJson[rowIndex][productNameIndex] = product.title;
+
+              // Set the images
+              product.images.forEach((image, imgIndex) => {
+                if (imgIndex < imageIndices.length) {
+                  convertJson[rowIndex][imageIndices[imgIndex]] = image.url;
+                }
+              });
+
+              // Set default values for various columns
+              convertJson[rowIndex][categoryIndex] = "T-shirts (601226)";
+              convertJson[rowIndex][parcelWeightIndex] = 0.3;
+              convertJson[rowIndex][parcelLengthIndex] = 9;
+              convertJson[rowIndex][parcelWidthIndex] = 9;
+              convertJson[rowIndex][parcelHeightIndex] = 2;
+              convertJson[rowIndex][productCotton] = "Cotton";
+              convertJson[rowIndex][sizeChartIndex] = sizeChart;
+              const fixImageIndex = headers.indexOf(`image_${product.images.length + 1}`);
+              convertJson[rowIndex][fixImageIndex] = sizeChart;
+
+              // Check if warehouse_quantity/ and product_property/ columns were found
+              if (warehouseQuantityIndex !== -1) {
+                convertJson[rowIndex][warehouseQuantityIndex] = 16; // Set warehouse_quantity/7360488738243249963 to default value
+              }
+
+              convertJson[rowIndex][productPropertyIndex] = "Unisex"; // Set product_property/100398 to 'Unisex'
+              convertJson[rowIndex][colorIndex] = color;
+              convertJson[rowIndex][sizeStyleIndex] = item3.size;
+              convertJson[rowIndex][priceIndex] = item3.price;
+              convertJson[rowIndex][descriptionIndex] = description;
+
+              rowIndex++; // Move to the next row
+            });
+          });
+        });
+      }
 
       // Convert back to Excel and download
       const newSheet = XLSX.utils.json_to_sheet(convertJson, { skipHeader: true });
@@ -648,7 +806,7 @@ export default function Crawl() {
   };
 
 
-  console.log("product list", productList);
+
  
   const handleChangeDes =(value)=>{
     setDescription(value)
@@ -657,7 +815,7 @@ export default function Crawl() {
   const handleChangeSizeChart =(value)=>{
       setSizeChart(value)
   }
-  console.log("sizechart", sizeChart)
+
 
   return (
     <div>
@@ -768,6 +926,34 @@ export default function Crawl() {
                 )}
               />
             </Table>
+            <Table dataSource={tableSweat} pagination={false}>
+              <Column title="Size " dataIndex="size" key="size" />
+              <Column
+                title="Price Sweatshirt"
+                key="price"
+                render={(text, record, index) => (
+                  <Input
+                    type="text"
+                    value={record.price}
+                    onChange={(e) => handlePriceSweatChange(e.target.value, index)}
+                  />
+                )}
+              />
+            </Table>
+            <Table dataSource={tableHoodie} pagination={false}>
+              <Column title="Size " dataIndex="size" key="size" />
+              <Column
+                title="Price Hoodie"
+                key="price"
+                render={(text, record, index) => (
+                  <Input
+                    type="text"
+                    value={record.price}
+                    onChange={(e) => handlePriceHoodieChange(e.target.value, index)}
+                  />
+                )}
+              />
+            </Table>
           </Modal>
         </div>
         <TextArea
@@ -781,6 +967,13 @@ export default function Crawl() {
             value={description}
             onChange={handleChangeDes}
           />
+        </div>
+        <div>
+          <Checkbox indeterminate={indeterminate} onChange={onCheckAllChange} checked={checkAll}>
+            Check all
+          </Checkbox>
+          <Divider />
+          <CheckboxGroup options={ShirtOptions} value={checkedList} onChange={onChange} />
         </div>
         {productList && productList?.length ? renderProductList() : null}
       </div>
