@@ -139,24 +139,27 @@ export default function Crawl() {
     { size: "2XL", price: 26.9 },
     { size: "3XL", price: 28.9 },
     { size: "4XL", price: 28.9 },
+    { size: "5XL", price: 30.9 },
   ];
   const sizesSweat = [
-    { size: "S", price: 25.9 },
-    { size: "M", price: 25.9 },
-    { size: "L", price: 25.9 },
-    { size: "XL", price: 25.9 },
-    { size: "2XL", price: 26.9 },
-    { size: "3XL", price: 28.9 },
-    { size: "4XL", price: 28.9 },
+    { size: "S", price: 39.5 },
+    { size: "M", price: 41.5 },
+    { size: "L", price: 41.5 },
+    { size: "XL", price: 41.5 },
+    { size: "2XL", price: 43.5 },
+    { size: "3XL", price: 44.5 },
+    { size: "4XL", price: 44.5 },
+    { size: "5XL", price: 47.5 },
   ];
   const sizesHoodie = [
-    { size: "S", price: 25.9 },
-    { size: "M", price: 25.9 },
-    { size: "L", price: 25.9 },
-    { size: "XL", price: 25.9 },
-    { size: "2XL", price: 26.9 },
-    { size: "3XL", price: 28.9 },
-    { size: "4XL", price: 28.9 },
+    { size: "S", price: 43.9 },
+    { size: "M", price: 46.9 },
+    { size: "L", price: 46.9 },
+    { size: "XL", price: 46.9 },
+    { size: "2XL", price: 48.9 },
+    { size: "3XL", price: 49.9 },
+    { size: "4XL", price: 50.9 },
+    { size: "5XL", price: 51.9 },
   ];
   const data = sizes.map((item, index) => ({
     key: index,
@@ -877,22 +880,7 @@ export default function Crawl() {
         </div>
         <div className="flex justify-between items-center">
           <div className="flex gap-2 items-center mt-5">
-            <Select
-              defaultValue="excel"
-              style={{
-                width: 200,
-              }}
-              onChange={(value) => setDownloadType(value)}
-              options={downloadTypeOption}
-            />
-            <Button
-              type="primary"
-              disabled={CountSelectedItems === 0}
-              icon={<DownloadOutlined />}
-              onClick={onExportByType}
-            >
-              Export excel
-            </Button>
+           
 
             <div>
               <span className="font-semibold">{CountSelectedItems} products</span>
