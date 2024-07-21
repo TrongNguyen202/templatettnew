@@ -709,7 +709,7 @@ export default function Crawl() {
           colors.forEach((color) => {
             sizeStylesSweat.forEach((item2) => {
               if (!convertJson[rowIndex]) {
-                convertJson[rowIndex] = []; // Initialize row if it doesn't exist
+                convertJson[rowIndex] = []; 
               }
 
               // Set the product name
@@ -724,7 +724,7 @@ export default function Crawl() {
 
               // Set default values for various columns
               convertJson[rowIndex][categoryIndex] = "T-shirts (601226)";
-              convertJson[rowIndex][parcelWeightIndex] = 0.3;
+              convertJson[rowIndex][parcelWeightIndex] = 0.5;
               convertJson[rowIndex][parcelLengthIndex] = 9;
               convertJson[rowIndex][parcelWidthIndex] = 9;
               convertJson[rowIndex][parcelHeightIndex] = 2;
@@ -769,7 +769,7 @@ export default function Crawl() {
 
               // Set default values for various columns
               convertJson[rowIndex][categoryIndex] = "T-shirts (601226)";
-              convertJson[rowIndex][parcelWeightIndex] = 0.3;
+              convertJson[rowIndex][parcelWeightIndex] = 1;
               convertJson[rowIndex][parcelLengthIndex] = 9;
               convertJson[rowIndex][parcelWidthIndex] = 9;
               convertJson[rowIndex][parcelHeightIndex] = 2;
