@@ -138,8 +138,8 @@ export default function Crawl() {
     { size: "XL", price: 25.9 },
     { size: "2XL", price: 26.9 },
     { size: "3XL", price: 28.9 },
-    { size: "4XL", price: 28.9 },
-    { size: "5XL", price: 30.9 },
+   
+    
   ];
   const sizesSweat = [
     { size: "S", price: 39.5 },
@@ -148,8 +148,8 @@ export default function Crawl() {
     { size: "XL", price: 41.5 },
     { size: "2XL", price: 43.5 },
     { size: "3XL", price: 44.5 },
-    { size: "4XL", price: 44.5 },
-    { size: "5XL", price: 47.5 },
+ 
+
   ];
   const sizesHoodie = [
     { size: "S", price: 43.9 },
@@ -158,8 +158,8 @@ export default function Crawl() {
     { size: "XL", price: 46.9 },
     { size: "2XL", price: 48.9 },
     { size: "3XL", price: 49.9 },
-    { size: "4XL", price: 50.9 },
-    { size: "5XL", price: 51.9 },
+  
+
   ];
   const data = sizes.map((item, index) => ({
     key: index,
@@ -588,7 +588,7 @@ export default function Crawl() {
     const reader = new FileReader();
     const colors = [
       "Black", "White", "Sand", "Forest Green", "Ash", "Sport Grey", "Light Pink",
-      "Light Blue", "Dark Heather", "Army Green", "Daisy", "Red", "Navy", "Dark Brown"
+      "Light Blue", "Dark Heather", "Army Green", "Red", "Navy"
     ];
 
     const sizeStyles = tableData.map(item => ({
