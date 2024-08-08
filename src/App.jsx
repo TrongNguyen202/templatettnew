@@ -679,7 +679,7 @@ export default function Crawl() {
               });
 
               // Set default values for various columns
-              convertJson[rowIndex][categoryIndex] = "T-shirts (601226)";
+              convertJson[rowIndex][categoryIndex] = "Women's Tops/T-shirts";
               convertJson[rowIndex][parcelWeightIndex] = 0.3;
               convertJson[rowIndex][parcelLengthIndex] = 9;
               convertJson[rowIndex][parcelWidthIndex] = 9;
@@ -726,7 +726,7 @@ export default function Crawl() {
               });
 
               // Set default values for various columns
-              convertJson[rowIndex][categoryIndex] = "T-shirts (601226)";
+              convertJson[rowIndex][categoryIndex] = "Women's Tops/T-shirts";
               convertJson[rowIndex][parcelWeightIndex] = 0.5;
               convertJson[rowIndex][parcelLengthIndex] = 9;
               convertJson[rowIndex][parcelWidthIndex] = 9;
@@ -771,7 +771,7 @@ export default function Crawl() {
               });
 
               // Set default values for various columns
-              convertJson[rowIndex][categoryIndex] = "T-shirts (601226)";
+              convertJson[rowIndex][categoryIndex] = "Women's Tops/T-shirts";
               convertJson[rowIndex][parcelWeightIndex] = 1;
               convertJson[rowIndex][parcelLengthIndex] = 9;
               convertJson[rowIndex][parcelWidthIndex] = 9;
